@@ -6,7 +6,7 @@ server {
     listen 80;
     server_name localhost;
 
-    root /var/www/html/vite-react-app;
+    root /var/www/html/vite-react-app/dist;
     index index.html;
 
     location / {
@@ -17,6 +17,10 @@ EOF
 
 # Remove default config if exists
 sudo rm -f /etc/nginx/conf.d/default.conf
+
+# Set correct permissions (optional but helpful)
+sudo chmod -R 755 /var/www/html/vite-react-app
+sudo chown -R nginx:nginx /var/www/html/vite-react-app
 
 # Enable and restart Nginx
 sudo systemctl enable nginx
