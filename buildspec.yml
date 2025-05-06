@@ -5,15 +5,32 @@ phases:
     runtime-versions:
       nodejs: 18
     commands:
-      - echo Installing dependencies...
-      - npm install
+      - echo "Installing dependencies..."
+      - npm ci
 
   build:
     commands:
-      - echo Building Vite React App...
+      - echo "Building Vite React App..."
       - npm run build
+      - echo "Build complete."
 
+  post_build:
+    commands:
+      - echo "Zipping build output and deployment files..."
+      - mkdir package
+      - cp -r dist package/
+      - cp appspec.yml package/
+      - cp -r scripts/ package/scripts/
+      - cd package
+      - zip -r ../vite-react-app.zip .
+      - cd ..
+      - echo "Uploading artifact to S3..."
+      - aws s3 cp vite-react-app.zip s3://capsbucket9850/vite-react-app.zip
+      - echo "Triggering deployment using CodeDeploy..."
+      - aws deploy create-deployment \
+          --application-name vite-react-app-deploy \
+          --deployment-group-name vite-react-group \
+          --s3-location bucket=capsbucket9850,key=vite-react-app.zip,bundleType=zip
 artifacts:
   files:
-    - '**/*'
-  base-directory: dist
+    - vite-react-app.zip
